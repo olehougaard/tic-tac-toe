@@ -4,42 +4,41 @@ function model() {
 
     function createModel(board, inTurn) {
         const setTile = (board, x, y, value) => updateArray(board, x, row => updateArray(row, y, _ => value))
-        const tile = (x, y) => board[x][y];
+        const tile = (x, y) => board[x][y]
 
         const row = (x, y, dx, dy) => array(board.length, (_, i) => ({x: x + i * dx, y: y + i * dy}))
-        const verticalRows = array(board.length, (_, i) => row(0, i, 1, 0));
-        const horizontalRows = array(board.length, (_, i) => row(i, 0, 0, 1));
-        const diagonalRows = [row(0, 0, 1, 1), row(0, 2, 1, -1)];
+        const verticalRows = array(board.length, (_, i) => row(0, i, 1, 0))
+        const horizontalRows = array(board.length, (_, i) => row(i, 0, 0, 1))
+        const diagonalRows = [row(0, 0, 1, 1), row(0, 2, 1, -1)]
         const allRows = verticalRows.concat(horizontalRows).concat(diagonalRows)
         
         const hasWon = (theRow, candidate) =>  theRow.every(({x, y}) => tile(x, y) === candidate)
         const winningRow = (candidate) => allRows.find(x => hasWon(x, candidate))
         const getWinner = (candidate) => {
             const w = winningRow(candidate);
-            return w && { winner: candidate, row : w };
+            return w && { winner: candidate, row : w }
         }
         const winner= () => getWinner('X') || getWinner('O');
         
         const playerInTurn = () => inTurn
         
         const legalMove = (x, y) => {
-            if (x < 0 || y < 0 || x > 2 || y > 2) return false;
-            if (tile(x, y)) return false;
-            if (winner()) return false;
-            return true;
+            if (x < 0 || y < 0 || x > 2 || y > 2) return false
+            if (tile(x, y)) return false
+            if (winner()) return false
+            return true
         }
         
         const makeMove = (x, y) => {
-            if (!legalMove(x, y)) throw 'Illegal move';
-            return createModel(setTile(board, x, y, inTurn), (inTurn === 'X') ? 'O' : 'X');
+            if (!legalMove(x, y)) throw 'Illegal move'
+            return createModel(setTile(board, x, y, inTurn), (inTurn === 'X') ? 'O' : 'X')
         }
         
-        const clear = () => createModel(array(3, _ => array(3)), 'X');
+        const clear = () => createModel(array(3, _ => array(3)), 'X')
 
-        return { tile, winner, playerInTurn, legalMove, makeMove, clear, board };
+        return { tile, winner, playerInTurn, legalMove, makeMove, clear, board }
     }
 
-    return createModel(array(3, _ => array(3)), 'X');
+    return createModel(array(3, _ => array(3)), 'X')
 }
 
-export default model 

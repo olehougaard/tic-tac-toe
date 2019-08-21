@@ -3,26 +3,26 @@ function presenter(view, model) {
     
     function showModel() {
         if (model.winner()) {
-            view.showWinner(model.winner());
+            view.showWinner(model.winner())
         } else {
-            view.showInTurn(model.playerInTurn());
+            view.showInTurn(model.playerInTurn())
         }
-        view.updateBoard(model.board);
+        view.updateBoard(model.board)
     }
 
     function clickBoard(x, y) {
         if (model.legalMove(x, y)) {
-            model.makeMove(x, y);
-            showModel();
+            model.makeMove(x, y)
+            showModel()
         }
-    };
+    }
     
     function clickReset() {
-        model.clear();
-        showModel();
-    };
+        model.clear()
+        showModel()
+    }
 
-    showModel();
+    showModel()
 
     return { clickBoard, clickReset }
 }

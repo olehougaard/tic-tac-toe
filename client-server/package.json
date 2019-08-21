@@ -1,0 +1,14 @@
+{
+  "name": "gameserver",
+  "version": "1.0.0",
+  "description": "",
+  "main": "gameserver.js",
+  "dependencies": {
+    "express": "^4.16.2"
+  },
+  "scripts": {
+    "start": "node gameserver.js"
+  },
+  "author": "",
+  "license": "ISC"
+}

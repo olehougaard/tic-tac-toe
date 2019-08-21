@@ -24,9 +24,6 @@
             margin-top: 10px;
         }
     </style>
-    <script>var module = {}</script>
-    <script src="view.js"></script>
-    <script src="presenter.js"></script>
 </head>
 <body>
     <h1>Tic-tac-toe</h1>
@@ -34,7 +31,9 @@
     <table id = 'board'></table>
     <button id = 'reset'>Reset</button>
 </body>
-<script>
+<script type="module">
+    import view from "./view.js"
+    import presenter from "./presenter.js"
     fetch('http://localhost:8080/clean', { method: 'POST' })
     .then(res => res.json())
     .then(json => {

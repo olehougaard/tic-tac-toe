@@ -39,3 +39,5 @@ function presenter(view, model) {
 
     return { clickBoard, clickReset }
 }
+
+export default presenter

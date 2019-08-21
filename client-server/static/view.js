@@ -48,3 +48,5 @@ function view() {
 
     return { showWinner, showStalemate, showInTurn, updateBoard, listen }
 }
+
+export default view

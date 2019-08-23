@@ -2,13 +2,15 @@ function reduce(state, action) {
     console.log(state)
     console.log(action)
     switch (action.type) {
-        case 'move': {
-            const { game } = state
-            const {x, y} = action
-            if (game.legalMove(x, y))
-                return {game: game.makeMove(x, y) }
-            else
-                return {game}
+        case 'make-moves': {
+            const {moves, inTurn, winner, stalemate} = action
+            console.log(moves)
+            const { game, player } = state
+            const board = game.board.map(row => [...row])
+            moves.forEach(({x, y, player}) => board[x][y] = player)
+            return { 
+                game:{board, inTurn, winner, stalemate, ongoing: game.ongoing }, 
+                player}
         }
         case 'reset':
             const { game, player } = action

@@ -13,14 +13,14 @@ const Message = ({status: {winner, inTurn, stalemate, ongoing}, player}) => {
       return <p>Your turn, {inTurn}</p>
 }        
 
-const Board = ({ board, dispatch }) =>
+const Board = ({ game: { board, gameNumber }, dispatch, player }) =>
   <table>
       <tbody>
-          {board.map((row, i) =>
-          <tr key={i}>{row.map ( (tile, j) => 
-              <td key={i+''+j}
+          {board.map((row, x) =>
+          <tr key={x}>{row.map ( (tile, y) => 
+              <td key={x+''+y}
                   className={tile || 'blank'}
-                  onClick= {() => dispatch({type:'move', x: i, y: j})}/>)
+                  onClick= {() => dispatch({type:'move', x, y, player, gameNumber })}/>)
               }</tr>
           )}
       </tbody>
@@ -45,7 +45,7 @@ const View = ({ state, dispatch }) => {
         <Message status = {state.game} player = {state.player} />
         {
           (state.game.ongoing)?
-            <Board board={state.game.board} dispatch = {dispatch}/>
+            <Board game={state.game} dispatch = {dispatch} player = {state.player} />
             : <div></div>
         }
       <button id = 'concede' onClick = {() => dispatch({type: "concede"})}>Concede</button>

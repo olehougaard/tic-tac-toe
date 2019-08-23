@@ -47,7 +47,8 @@ const server_dispatch = async (action, dispatch) => {
       const { moves, inTurn, winner, stalemate } = await call_server(
         `http://localhost:8080/games/${action.gameNumber}/moves`, 
         { method: 'POST', body: JSON.stringify({x, y, inTurn: player})})
-      return await dispatch({type: 'make-moves', moves, inTurn, winner, stalemate})
+        const { game: {gameNumber} } = await dispatch({type: 'make-moves', moves, inTurn, winner, stalemate})
+        return wait_for_moves(gameNumber, dispatch)
     }
     default:
       return null

@@ -3,14 +3,14 @@ import ReactDOM from 'react-dom';
 import './View.css';
 
 const Message = ({status: {winner, inTurn, stalemate, ongoing}, player}) => {
-  if (!ongoing || player !== inTurn) {
-    return <p>Waiting for player...</p>
-  } if (winner)
-      return <p>{winner.winner} won!</p>
+  if (winner)
+    return <p>{winner.winner} won!</p>
   else if (stalemate)
-      return <p>Stalemate!</p>
+    return <p>Stalemate!</p>
+  else if (!ongoing || player !== inTurn) 
+    return <p>Waiting for player...</p>
   else    
-      return <p>Your turn, {inTurn}</p>
+    return <p>Your turn, {inTurn}</p>
 }        
 
 const Board = ({ game: { board, gameNumber }, dispatch, player }) =>

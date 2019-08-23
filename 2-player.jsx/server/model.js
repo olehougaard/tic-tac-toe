@@ -32,7 +32,7 @@ const model = (() => {
         
         const makeMove = (x, y) => {
             if (!legalMove(x, y)) throw 'Illegal move'
-            return createModel(setTile(board, x, y, inTurn), (inTurn === 'X') ? 'O' : 'X', gameNumber, [...moves, {x, y}])
+            return createModel(setTile(board, x, y, inTurn), (inTurn === 'X') ? 'O' : 'X', gameNumber, [...moves, {x, y, player: inTurn}])
         }
         
         const json = (extras = {}) => 

@@ -9,7 +9,7 @@ function reduce(state, action) {
             const board = game.board.map(row => [...row])
             moves.forEach(({x, y, player}) => board[x][y] = player)
             return { 
-                game:{board, inTurn, winner, stalemate, ongoing: game.ongoing }, 
+                game:{board, inTurn, winner, stalemate, ongoing: game.ongoing, gameNumber: game.gameNumber }, 
                 player}
         }
         case 'reset':

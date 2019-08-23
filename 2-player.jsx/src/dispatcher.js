@@ -19,6 +19,16 @@ const wait_for = (url, condition) => {
   return new Promise(loop)
 }
 
+const wait_for_moves = async (gameNumber, dispatch) => {
+  const res = await call_server(`http://localhost:8080/games/${gameNumber}/moves`, { method: 'GET' })
+  console.log(res)
+  const { moves: original_moves } = res
+  const moves = await wait_for(`http://localhost:8080/games/${gameNumber}/moves`, 
+                              ({ moves }) => moves.length > original_moves.length)
+  console.log(moves)
+  return await dispatch(Object.assign({type: 'make-moves'}, moves))
+}
+
 const server_dispatch = async (action, dispatch) => {
   switch(action.type) {
     case 'new': {
@@ -29,7 +39,8 @@ const server_dispatch = async (action, dispatch) => {
     }
     case 'join': {
       const game = await call_server(`http://localhost:8080/games/${action.gameNumber}`, { method: 'PATCH', body: JSON.stringify({ongoing: true})})
-      return await dispatch({type: 'reset', player: 'O', game})
+      const { game: {gameNumber} } = await dispatch({type: 'reset', player: 'O', game})
+      return wait_for_moves(gameNumber, dispatch)
     }
     case 'move': {
       const { x, y, player } = action

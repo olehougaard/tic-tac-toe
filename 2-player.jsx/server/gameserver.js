@@ -66,15 +66,25 @@ gameserver.patch('/games/:gameNumber', (req, res) => {
     const gameNumber = req.params.gameNumber
     req.body
     .then(JSON.parse)
-    .then( ({ongoing}) => {
-        ongoing = !!ongoing
+    .then( game => {
         if (!games[gameNumber])
             res.status(404).send()
-        else if (!ongoing || ongoing_games[gameNumber])
-            res.status(403).send()
-        else {
-            ongoing_games[gameNumber] = true
-            res.send(games[gameNumber].json({ongoing}))
+        else if (game.hasOwnProperty('ongoing')) {
+            const ongoing = game.ongoing
+            if (!ongoing || ongoing_games[gameNumber])
+                res.status(403).send()
+            else {
+                ongoing_games[gameNumber] = true
+                res.send(games[gameNumber].json({ongoing: true}))
+            }
+        } else if (game.hasOwnProperty('winner')) {
+            if (!ongoing_games[gameNumber])
+                res.status(403).send()
+            else {
+                const winner = game.winner
+                games[gameNumber] = games[gameNumber].conceded(winner)
+                res.send(games[gameNumber].json({ongoing: true}))
+            }
         }
     })
 })
@@ -87,20 +97,20 @@ gameserver.post('/games/:gameNumber/moves', (req, res) => {
         const game = games[gameNumber]
         if (!ongoing_games[gameNumber])
             res.status(403).send()
-        else if (inTurn === game.playerInTurn() && game.legalMove(x,y)) {
+        else if (inTurn === game.playerInTurn && game.legalMove(x,y)) {
             const afterMove = game.makeMove(x, y)
             games[gameNumber] = afterMove
             res.send(JSON.stringify({ 
-                moves: [{x, y, player: game.playerInTurn()}], 
-                inTurn: afterMove.playerInTurn(), 
-                winner: afterMove.winner(), 
-                stalemate: afterMove.stalemate()  }))
+                moves: [{x, y, player: game.playerInTurn}], 
+                inTurn: afterMove.playerInTurn, 
+                winner: afterMove.winner, 
+                stalemate: afterMove.stalemate  }))
         } else {
             res.send(JSON.stringify({ 
                 moves: [], 
-                inTurn: game.playerInTurn(), 
-                winner: game.winner(), 
-                stalemate: game.stalemate() }))
+                inTurn: game.playerInTurn, 
+                winner: game.winner, 
+                stalemate: game.stalemate }))
         }
     })
 })
@@ -108,9 +118,9 @@ gameserver.post('/games/:gameNumber/moves', (req, res) => {
 gameserver.get('/games/:gameNumber/moves', (req, res) => {
     send_game_data(res, req.params.gameNumber, g => ({ 
         moves: g.moves, 
-        inTurn: g.playerInTurn(),
-        winner: g.winner(),
-        stalemate: g.stalemate()
+        inTurn: g.playerInTurn,
+        winner: g.winner,
+        stalemate: g.stalemate
     }))
 })
 

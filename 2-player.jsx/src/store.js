@@ -1,13 +1,12 @@
 function reduce(state, action) {
-    console.log(state)
-    console.log(action)
     switch (action.type) {
         case 'make-moves': {
             const {moves, inTurn, winner, stalemate} = action
-            console.log(moves)
             const { game, player } = state
             const board = game.board.map(row => [...row])
-            moves.forEach(({x, y, player}) => board[x][y] = player)
+            moves
+            .filter(move => move.x !== undefined && move.y !== undefined)
+            .forEach(({x, y, player}) => board[x][y] = player)
             return { 
                 game:{board, inTurn, winner, stalemate, ongoing: game.ongoing, gameNumber: game.gameNumber }, 
                 player}

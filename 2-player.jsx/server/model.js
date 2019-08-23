@@ -18,15 +18,13 @@ const model = (() => {
             const w = winningRow(candidate)
             return w && { winner: candidate, row : w }
         }
-        const winner = () => getWinner('X') || getWinner('O')
-        const stalemate = () => plateFull && !winner()
-        
-        const playerInTurn = () => inTurn
+        const winner = getWinner('X') || getWinner('O')
+        const stalemate = plateFull && !winner
         
         const legalMove = (x, y) => {
             if (x < 0 || y < 0 || x > 2 || y > 2) return false
             if (board[x][y]) return false
-            if (winner()) return false
+            if (winner || stalemate) return false
             return true
         }
         
@@ -37,9 +35,37 @@ const model = (() => {
         
         const json = (extras = {}) => 
             Object.assign(extras, 
-                          {board, inTurn, winner: winner(), stalemate: stalemate(), gameNumber})
+                          {board, inTurn, winner, stalemate, gameNumber})
+
+        const conceded = winner => {
+            const win_state = { winner, row: undefined}
+            const conceded_state = { 
+                winner: win_state, 
+                stalemate: false, 
+                playerInTurn: inTurn, 
+                legalMove: () => false, 
+                makeMove: () => conceded_state,
+                conceded: () => conceded_state, 
+                board, 
+                json: (extras = {}) => Object.assign(extras,  {board, inTurn, winner: win_state, stalemate, gameNumber}), 
+                gameNumber, 
+                moves: [...moves, { conceded: true, player: inTurn }]
+            }
+            return conceded_state
+        }
         
-        return { winner, stalemate, playerInTurn, legalMove, makeMove, board, json, gameNumber, moves }
+        return { 
+            winner, 
+            stalemate, 
+            playerInTurn: inTurn, 
+            legalMove, 
+            makeMove,
+            conceded, 
+            board, 
+            json, 
+            gameNumber, 
+            moves 
+        }
     }
 
     return gameNumber => createModel(array(3, _ => array(3)), 'X', gameNumber, [])

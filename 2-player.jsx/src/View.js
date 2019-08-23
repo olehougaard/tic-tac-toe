@@ -38,7 +38,6 @@ const GamesList = ({ games, dispatch }) => (
 )
 
 const View = ({ state, dispatch }) => {
-  console.log(state)
   if (state.game) {
     return <div> 
       <h1>Tic-tac-toe</h1>
@@ -48,7 +47,14 @@ const View = ({ state, dispatch }) => {
             <Board game={state.game} dispatch = {dispatch} player = {state.player} />
             : <div></div>
         }
-      <button id = 'concede' onClick = {() => dispatch({type: "concede"})}>Concede</button>
+      <button id = 'concede' 
+              onClick = {() => 
+                dispatch({
+                  type: "concede", 
+                  player: state.player, 
+                  gameNumber: state.game.gameNumber})}>
+                    Concede
+      </button>
     </div>
   } else {
     return <div>

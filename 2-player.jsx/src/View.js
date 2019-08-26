@@ -37,33 +37,38 @@ const GamesList = ({ games, dispatch }) => (
   </div>
 )
 
-const View = ({ state, dispatch }) => {
-  if (state.game) {
-    return <div> 
+const game_list_view = dispatch => ({ games }) => 
+  <div>
+    <h1>Choose game</h1>
+    <GamesList games={games} dispatch = {dispatch} />
+    <button id = 'new' onClick = { () => dispatch({type: "new"})}>New game</button>
+  </div>
+
+
+const game_view = dispatch => ({ game, player }) => 
+<div> 
       <h1>Tic-tac-toe</h1>
-        <Message status = {state.game} player = {state.player} />
+        <Message status = {game} player = {player} />
         {
-          (state.game.ongoing)?
-            <Board game={state.game} dispatch = {dispatch} player = {state.player} />
+          (game.ongoing)?
+            <Board game={game} dispatch = {dispatch} player = {player} />
             : <div></div>
         }
       <button id = 'concede' 
               onClick = {() => 
                 dispatch({
                   type: "concede", 
-                  player: state.player, 
-                  gameNumber: state.game.gameNumber})}>
+                  player: player, 
+                  gameNumber: game.gameNumber})}>
                     Concede
       </button>
     </div>
-  } else {
-    return <div>
-      <h1>Choose game</h1>
-      <GamesList games={state.games} dispatch = {dispatch} />
-      <button id = 'new' onClick = { () => dispatch({type: "new"})}>New game</button>
-    </div>
-  }
-}
+
+const View = ({ state, dispatch }) => state.accept({
+  visit_pre_game: game_list_view(dispatch),
+  visit_game: game_view(dispatch)
+})
+
 
 const render = dispatch => state => ReactDOM.render(<View state={ state } dispatch = {dispatch} />, document.getElementById('root'));
 

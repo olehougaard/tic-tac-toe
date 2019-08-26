@@ -1,21 +1,19 @@
+import { game_state, apply_move } from './model'
+
 function reduce(state, action) {
     switch (action.type) {
         case 'make-moves': {
             const {moves, inTurn, winner, stalemate} = action
             const { game, player } = state
-            const board = game.board.map(row => [...row])
-            moves
-            .filter(move => move.x !== undefined && move.y !== undefined)
-            .forEach(({x, y, player}) => board[x][y] = player)
-            return { 
-                game:{board, inTurn, winner, stalemate, ongoing: game.ongoing, gameNumber: game.gameNumber }, 
-                player}
+            return game_state({ 
+                game: Object.assign(moves.reduce(apply_move, game), 
+                                    {inTurn, winner, stalemate}), 
+                player })
         }
         case 'reset':
-            const { game, player } = action
-            return { game, player }
+            return game_state(action)
         default:
-            return {}
+            return state
     }
 }
 

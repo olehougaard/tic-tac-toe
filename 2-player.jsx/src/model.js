@@ -1,45 +1,23 @@
-function model() {
-    const array = (length, init) => Array.apply(null, new Array(length)).map(init || (_ => undefined))
-    const updateArray = (a, i, f) => a.map((e, j) => (i === j) ? f(e, j) : e)
-
-    function createModel(board, inTurn) {
-        const setTile = (board, x, y, value) => updateArray(board, x, row => updateArray(row, y, _ => value))
-        const tile = (x, y) => board[x][y];
-
-        const row = (x, y, dx, dy) => array(board.length, (_, i) => ({x: x + i * dx, y: y + i * dy}))
-        const verticalRows = array(board.length, (_, i) => row(0, i, 1, 0));
-        const horizontalRows = array(board.length, (_, i) => row(i, 0, 0, 1));
-        const diagonalRows = [row(0, 0, 1, 1), row(0, 2, 1, -1)];
-        const allRows = verticalRows.concat(horizontalRows).concat(diagonalRows)
-        const plateFull = board.every(row => row.every(x => x))
-        
-        const hasWon = (theRow, candidate) =>  theRow.every(({x, y}) => tile(x, y) === candidate)
-        const winningRow = (candidate) => allRows.find(x => hasWon(x, candidate))
-        const getWinner = (candidate) => {
-            const w = winningRow(candidate);
-            return w && { winner: candidate, row : w };
-        }
-        const winner= getWinner('X') || getWinner('O');
-        const stalemate = plateFull && !winner
-        
-        const legalMove = (x, y) => {
-            if (x < 0 || y < 0 || x > 2 || y > 2) return false;
-            if (tile(x, y)) return false;
-            if (winner) return false;
-            return true;
-        }
-        
-        const makeMove = (x, y) => {
-            if (!legalMove(x, y)) throw new Error('Illegal move')
-            return createModel(setTile(board, x, y, inTurn), (inTurn === 'X') ? 'O' : 'X');
-        }
-        
-        const clear = () => createModel(array(3, _ => array(3)), 'X');
-
-        return { tile, winner, inTurn, legalMove, makeMove, clear, board, stalemate };
+export function pre_game_state({ games }) {
+    return { games, 
+             accept: ({ visit_pre_game }) => { if (visit_pre_game) return visit_pre_game({ games }) }
     }
-
-    return createModel(array(3, _ => array(3)), 'X');
 }
 
-export default model 
+export function game_state({ player, game }) {
+    return { player, game,
+             accept: ({ visit_game }) => { if (visit_game) return visit_game({ player, game }) }
+    }
+}
+
+export function apply_move(game, {x, y, player}) {
+    if (x === undefined && y === undefined)
+        return game
+    else {
+        const board = game.board.slice()
+        board[x] = board[x].slice()
+        board[x][y] = player
+        return Object.assign({}, game, { board })
+    }
+}
+

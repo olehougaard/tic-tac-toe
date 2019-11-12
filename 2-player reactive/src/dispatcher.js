@@ -1,5 +1,5 @@
 import { ajax } from 'rxjs/ajax'
-import { timer } from 'rxjs'
+import { interval } from 'rxjs'
 import { pairwise, filter, map, concatMap, takeWhile } from 'rxjs/operators'
 
 const call_server = (url, init) => 
@@ -24,7 +24,7 @@ const wait_for = (url, condition) => {
 }  
 
 const rmu = (gameNumber, dispatch) => {
-  timer(0, 100)
+  interval(100)
     .pipe(concatMap(() => ajax.getJSON(`http://localhost:8080/games/${gameNumber}/moves`)))
     .pipe(pairwise())
     .pipe(filter(([original, changed]) => original.moves.length < changed.moves.length))

@@ -23,7 +23,7 @@ const wait_for = (url, condition) => {
   return new Promise(loop)
 }  
 
-const rmu = (gameNumber, dispatch) => {
+const poll_server = (gameNumber, dispatch) => {
   interval(100)
     .pipe(concatMap(() => ajax.getJSON(`http://localhost:8080/games/${gameNumber}/moves`)))
     .pipe(pairwise())
@@ -39,14 +39,14 @@ const server_dispatch = async (action, dispatch) => {
       const game = await call_server('http://localhost:8080/games', { method: 'POST' })
       const { game:{gameNumber}, player } = await dispatch({type: 'reset', player: 'X', game})
       const ongoing_game = await wait_for(`http://localhost:8080/games/${gameNumber}`, game => game.ongoing)
-      rmu(gameNumber, dispatch)
+      poll_server(gameNumber, dispatch)
       //run_moves_updater(gameNumber, dispatch)
       return await dispatch({type: 'reset', player, game: ongoing_game})
     }
     case 'join': {
       const game = await call_server(`http://localhost:8080/games/${action.gameNumber}`, { method: 'PATCH', body: JSON.stringify({ongoing: true})})
       const state = await dispatch({type: 'reset', player: 'O', game})
-      rmu(state.game.gameNumber, dispatch)
+      poll_server(state.game.gameNumber, dispatch)
       //run_moves_updater(state.game.gameNumber, dispatch)
       return state
     }

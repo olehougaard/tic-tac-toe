@@ -1,6 +1,6 @@
 import { game_state, apply_move } from './model'
 
-function reduce(state, action) {
+export function reduce(state, action) {
     switch (action.type) {
         case 'make-moves': {
             const {moves, inTurn, winner, stalemate} = action
@@ -16,22 +16,3 @@ function reduce(state, action) {
             return state
     }
 }
-
-function create_store(init_state) {
-    let state = init_state
-    let render
-
-    function onAction(action) {
-        state = reduce(state, action)
-        if (render) render(state)
-        return state
-    }
-
-    function setRender(_render) {
-        render = _render
-    }
-
-    return { onAction, state: () => state, setRender }
-}
-
-export default create_store

@@ -1,5 +1,4 @@
 import React from 'react';
-import ReactDOM from 'react-dom';
 import './View.css';
 
 const Message = ({status: {winner, inTurn, stalemate, ongoing}, player}) => {
@@ -69,7 +68,4 @@ const View = ({ state, dispatch }) => state.accept({
   visit_game: game_view(dispatch)
 })
 
-
-const render = dispatch => state => ReactDOM.render(<View state={ state } dispatch = {dispatch} />, document.getElementById('root'));
-
-export default render;
+export const create_view = dispatch => state => <View state={ state } dispatch = {dispatch} />

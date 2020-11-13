@@ -23,8 +23,6 @@ actions
 const log = x => { console.log(x); return x }
 
 merge(actions, ws.pipe(map(create_action)))
-//.pipe(map(log))
 .pipe(scan(reduce, pre_game_state({games: []})))
-.pipe(map(log))
 .pipe(map(view))
 .subscribe(render)

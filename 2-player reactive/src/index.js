@@ -19,9 +19,9 @@ fetch('http://localhost:8080/games')
 
   render(view(init_state))
 
-  actions
-  .pipe(mergeMap(server_dispatch_rx))
-  .pipe(scan(reduce, init_state))
-  .pipe(map(view))
+  actions.pipe(
+    mergeMap(server_dispatch_rx),
+    scan(reduce, init_state),
+    map(view))
   .subscribe(render)
 })

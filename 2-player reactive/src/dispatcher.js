@@ -2,7 +2,9 @@ import { ajax } from 'rxjs/ajax'
 import { interval, of, merge} from 'rxjs'
 import { pairwise, filter, map, concatMap, takeWhile, first, share } from 'rxjs/operators'
 
-const poll_url = url => interval(100).pipe(concatMap(() => ajax.getJSON(url)))
+const poll_url = url => 
+interval(100)
+.pipe(concatMap(() => ajax.getJSON(url)))
 
 const poll_moves = gameNumber => 
   poll_url(`http://localhost:8080/games/${gameNumber}/moves`)

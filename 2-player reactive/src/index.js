@@ -3,14 +3,15 @@ import { pre_game_state } from './model'
 import { reduce } from './store'
 import { server_dispatch_rx } from './dispatcher'
 import { create_view } from './View'
+
+import { ajax } from 'rxjs/ajax'
 import { Subject } from 'rxjs'
 import { map, mergeMap, scan } from 'rxjs/operators'
 
 import ReactDOM from 'react-dom';
 
-fetch('http://localhost:8080/games')
-.then(res => res.json())
-.then(games => {
+ajax.getJSON('http://localhost:8080/games')
+.subscribe(games => {
   const actions = new Subject()
   const dispatch = action => actions.next(action)
   const render = dom => ReactDOM.render(dom, document.getElementById('root'))

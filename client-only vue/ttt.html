@@ -1,0 +1,44 @@
+<html>
+<head> 
+    <title>Tic-tac-toe</title>
+    <style>
+        td {
+            width: 40px;
+            height: 40px;
+            border: 1px solid black;
+        }
+        td.X {
+            background-image:url('X.png')
+        }
+        td.O {
+            background-image:url('O.png')
+        }
+        table {
+            border: 1px solid black;
+            border-spacing: 0;
+        }
+        #reset {
+            margin-top: 10px;
+        }
+    </style>
+    <script src="model.js"></script>
+    <script src="vm.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+</head>
+<body>
+    <h1>Tic-tac-toe</h1>
+    <div id = 'game'>
+        <p id = 'messages'>{{ message() }}</p>
+        <table id = 'board'>
+            <tr v-for='row in tiles()'>
+                <td v-for='tile in row' :class='tile.piece' v-on:click='makeMove(tile.x, tile.y)'></td>
+            </tr>
+        </table>
+        <button id = 'reset' @click='reset()'>Reset</button>
+    </div>
+</body>
+<script>
+    const gameVM = vm('#game')
+    const app = new Vue(gameVM)
+</script>
+</html>

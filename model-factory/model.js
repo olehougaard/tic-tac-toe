@@ -71,7 +71,6 @@ function createBoard(size) {
     return { 
         piece, 
         place, 
-        clear, 
         clearAll, 
         isDefined, 
         isClear, 

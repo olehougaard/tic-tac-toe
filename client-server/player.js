@@ -18,9 +18,9 @@ module.exports = model => {
         })
     }
 
-    const win = winningMove(model)
-    if (win) return win
-    const mate = stalemateMove(model)
-    if (mate) return mate
-    return moves.find(({x, y}) => model.legalMove(x, y))
+    function anyLegalMove(model) {
+        return moves.find(({x, y}) => model.legalMove(x, y))
+    }
+
+    return winningMove(model) || stalemateMove(model) || anyLegalMove(model)
 }

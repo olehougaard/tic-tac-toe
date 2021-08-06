@@ -1,47 +1,125 @@
-const model = (() => {
-    const array = (length, init) => Array.apply(null, new Array(length)).map(init || (_ => undefined))
-    const updateArray = (a, i, f) => a.map((e, j) => (i === j) ? f(e, j) : e)
+function range(size) {
+    return Array.apply(null, new Array(size)).map((_, i) => i)
+}
 
-    function createModel(board, inTurn, gameNumber) {
-        const setTile = (board, x, y, value) => updateArray(board, x, row => updateArray(row, y, _ => value))
-        const tile = (x, y) => board[x][y]
+function immutableArray(length, filler) {
+    function create(array) {
+        const get = i => array[i]
+        const set = (i, v) => create(array.map((e, j) => (i === j) ? v : e))
+        const map = f => create(array.map(f))
+        const every = array.every.bind(array)
+
+        return { 
+            get, 
+            set, 
+            length, 
+            map,
+            every
+        }
+    }
+
+    return create(range(length).map(filler || (_ => undefined)))
+}
+
+function squareArray(size) {
+    function create(array) {
+        const get = (i, j) => array.get(i).get(j)
+        const set = (i, j, v) => create(array.set(i, array.get(i).set(j, v)))
+        const map = f => create(array.map((a, i) => a.map((e, j) => f(e, i, j, array))))
+        const every = p => array.every(a => a.every(p))
+
+        return {
+            get,
+            set,
+            size,
+            map,
+            every
+        }
+    }
+    return create(immutableArray(size, _ => immutableArray(size)))
+}
+
+function board(size) {
+    function createBoard(pieces) {
+        const piece = (x, y) => pieces.get(x, y)
+        const tile = (x, y) => ({x, y, piece: piece(x, y)})
+        const isClear = (x, y) => !piece(x, y)
+        const isDefined = (x, y) => x >= 0 && x < pieces.size && y >= 0 && y < pieces.size
         
-        const row = (x, y, dx, dy) => array(board.length, (_, i) => ({x: x + i * dx, y: y + i * dy}))
-        const verticalRows = array(board.length, (_, i) => row(0, i, 1, 0))
-        const horizontalRows = array(board.length, (_, i) => row(i, 0, 0, 1))
-        const diagonalRows = [row(0, 0, 1, 1), row(0, 2, 1, -1)]
-        const allRows = verticalRows.concat(horizontalRows).concat(diagonalRows)
-        const plateFull = board.every(row => row.every(x => x))
+        const place = (x, y, piece) => {
+            if (!isDefined(x, y)) throw new Exception("Out of bounds")
+            if (!isClear(x, y)) throw new Exception("Occupied")
+            return createBoard(pieces.set(x, y, piece))
+        }
         
-        const hasWon = (theRow, candidate) =>  theRow.every(({x, y}) => tile(x, y) === candidate)
+        const isFull = pieces.every(x => x !== undefined)
+
+        const indices = range(pieces.size)
+        const rows = indices.map(x => indices.map(y => tile(x, y)))
+        const columns = indices.map(x => indices.map(y => tile(y, x)))
+        const diagonals = [ 
+            indices.map(x => tile(x, x)), 
+            indices.map(x => tile(x, pieces.size - x - 1)) 
+        ]
+
+        return {
+            isDefined,
+            piece,
+            isClear,
+            place,
+            isFull,
+            rows,
+            columns,
+            diagonals
+        }
+    }
+
+    return createBoard(squareArray(size))
+}
+
+function model(gameNumber) {
+    function createModel(theBoard, inTurn) {
+        const piece = (x, y) => theBoard.piece(x, y)
+
+        const allRows = theBoard.rows.concat(theBoard.columns).concat(theBoard.diagonals)
+        
+        const hasWon = (theRow, candidate) =>  theRow.every(({x, y}) => piece(x, y) === candidate)
         const winningRow = (candidate) => allRows.find(x => hasWon(x, candidate))
         const getWinner = (candidate) => {
-            const w = winningRow(candidate)
-            return w && { winner: candidate, row : w }
+            const row = winningRow(candidate)
+            return row && { winner: candidate, row }
         }
         const winner = () => getWinner('X') || getWinner('O')
-        const stalemate = () => plateFull && !winner()
+        const stalemate = () => theBoard.isFull && !winner()
         
         const playerInTurn = () => inTurn
         
-        const legalMove = (x, y) => {
-            if (x < 0 || y < 0 || x > 2 || y > 2) return false
-            if (tile(x, y)) return false
-            if (winner()) return false
-            return true
-        }
+        const legalMove = (x, y) => theBoard.isDefined(x, y) && theBoard.isClear(x, y) && !winner()
         
         const makeMove = (x, y) => {
             if (!legalMove(x, y)) throw 'Illegal move'
-            return createModel(setTile(board, x, y, inTurn), (inTurn === 'X') ? 'O' : 'X', gameNumber)
+            return createModel(theBoard.place(x, y, inTurn), (inTurn === 'X') ? 'O' : 'X')
         }
         
-        const json = () => JSON.stringify({board, inTurn, winner: winner(), stalemate: stalemate(), gameNumber})
-        
-        return { tile, winner, stalemate, playerInTurn, legalMove, makeMove, board, json, gameNumber }
+        const clear = () => createModel(board(3), 'X')
+
+        const json = () => JSON.stringify({board: range(3).map(x => range(3).map(y => piece(x, y))), inTurn, winner: winner(), stalemate: stalemate(), gameNumber})
+
+        return { 
+            piece, 
+            winner, 
+            stalemate,
+            playerInTurn, 
+            legalMove, 
+            makeMove, 
+            clear, 
+            board: theBoard,
+            gameNumber,
+            json
+        }
     }
 
-    return gameNumber => createModel(array(3, _ => array(3)), 'X', gameNumber)
-})()
+    return createModel(board(3), 'X')
+}
 
 module.exports = model

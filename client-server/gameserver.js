@@ -24,9 +24,9 @@ gameserver.use (function(req, _, next) {
 gameserver.use(express.static('static'))
 
 gameserver.post('/clean', (_, res) => {
-    console.log(games)
-    games.push(model(games.length))
-    res.send(games[games.length - 1].json())
+    const m = model(games.length)
+    games.push(m)
+    res.send(m.json())
 });
 
 gameserver.post('/move', (req, res) => {

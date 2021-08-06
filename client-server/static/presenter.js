@@ -1,5 +1,6 @@
-function presenter(view, model) {
+function presenter(view, dispatcher) {
     "use strict";
+    let model
     
     function showModel() {
         if (model.winner) {
@@ -12,30 +13,20 @@ function presenter(view, model) {
         view.updateBoard(model.board)
     }
 
-    function clickBoard(x, y) {
-        const { gameNumber } = model
-        fetch('http://localhost:8080/move', { method: 'POST', body: JSON.stringify({ x, y, gameNumber }) })
-        .then(res => res.json())
-        .then(json => {
-            const { moves, inTurn, winner, stalemate } = json
-            moves.forEach(({x, y, player}) => model.board[x][y] = player)
-            Object.assign(model, { inTurn, winner, stalemate })
-            showModel()
-        })
-        .catch(console.error)
+    async function clickBoard(x, y) {
+        const { moves, inTurn, winner, stalemate } = await dispatcher.move(x, y, model.gameNumber)
+        for(let {x, y, player} of moves) model.board[x][y] = player
+        Object.assign(model, { inTurn, winner, stalemate })
+        showModel()
     }
 
-    function clickReset() {
-        fetch('http://localhost:8080/clean', { method: 'POST' })
-        .then(res => res.json())
-        .then(json => {
-            model = json
-            showModel()
-        })
-        .catch(console.error)
+    async function clickReset() {
+        const clean = await dispatcher.clean()
+        model = clean
+        showModel()
     }
 
-    showModel()
+    clickReset()
 
     return { clickBoard, clickReset }
 }

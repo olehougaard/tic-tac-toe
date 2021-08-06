@@ -18,17 +18,19 @@
     <script src="model.js"></script>
     <script src="view.js"></script>
     <script src="presenter.js"></script>
-</head>
-<body>
+    <script>
+        function init() {
+            const theModel = model()
+            const theView = view()
+            const thePresenter = presenter(theView, theModel)
+            theView.listen(thePresenter)
+        }
+    </script>
+    </head>
+<body onload='init()'>
     <h1>Tic-tac-toe</h1>
     <p id = 'messages'></p>
     <table id = 'board'></table>
     <button id = 'reset'>Reset</button>
 </body>
-<script>
-    const theModel = model()
-    const theView = view()
-    const thePresenter = presenter(theView, theModel)
-    theView.listen(thePresenter)
-</script>
 </html>

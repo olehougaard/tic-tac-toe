@@ -11,15 +11,11 @@ function view() {
         for (let j = 0; j < 3; j++) {
             tiles[i][j] = tr.appendChild(document.createElement('td'))
         }
-    };
-    
-    function showWinner(winner) {
-        messages.textContent = winner.winner + ' won!'
-    };
-    
-    function showInTurn(inTurn) {
-        messages.textContent = 'Your turn, ' + inTurn
-    };
+    }
+
+    function showMessage(message) {
+        messages.textContent = message
+    }
     
     function updateBoard(board) {
         for (let i = 0; i < 3; i++) {
@@ -42,5 +38,5 @@ function view() {
         reset.onclick = listener.clickReset
     }
 
-    return { showWinner, showInTurn, updateBoard, listen }
+    return { showMessage, updateBoard, listen }
 }

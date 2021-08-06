@@ -2,12 +2,15 @@ function presenter(view, model) {
     "use strict";
     
     function showModel() {
-        if (model.winner()) {
-            view.showWinner(model.winner())
+        const w = model.winner()
+        if (w) {
+            view.showMessage(w.winner + ' won!')
+        } else if (model.stalemate()) {
+            view.showMessage('Stalemate')
         } else {
-            view.showInTurn(model.playerInTurn())
+            view.showMessage('Your turn, ' + model.playerInTurn())
         }
-        view.updateBoard(model.board)
+        view.updateBoard(model.piece)
     }
 
     function clickBoard(x, y) {

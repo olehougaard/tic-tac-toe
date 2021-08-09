@@ -1,4 +1,4 @@
-module.exports = model => {
+export default model => {
     const array = (length, init) => Array.apply(null, new Array(length)).map(init || (_ => undefined))
     const moves = [].concat.apply([], array(3, (_, x) => array(3, (_, y) => ({ x, y }))))
 

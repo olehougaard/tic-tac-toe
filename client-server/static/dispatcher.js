@@ -5,7 +5,7 @@ function dispatcher(endpoint) {
             return await res.json()
         },
         async clean() {
-            const res = await fetch('http://localhost:8080/clean', { method: 'POST' })
+            const res = await fetch(new URL('clean', endpoint), { method: 'POST' })
             return await res.json()
         }
     }

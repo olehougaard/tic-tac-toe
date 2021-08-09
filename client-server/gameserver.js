@@ -1,6 +1,6 @@
-const express = require('express')
-const model = require('./model.js')
-const ai = require('./player.js')
+import express from 'express'
+import model from './static/model.js'
+import ai from './player.js'
 
 const games = []
 
@@ -33,6 +33,8 @@ gameserver.post('/move', (req, res) => {
     req.body
     .then(JSON.parse)
     .then( ({ x, y, gameNumber }) => {
+        console.log(gameNumber)
+        console.log(games)
         const game = games[gameNumber]
         if (game.legalMove(x,y)) {
             const afterMove = game.makeMove(x, y)

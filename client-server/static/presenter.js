@@ -1,28 +1,29 @@
+import model from './model.js'
+
 function presenter(view, dispatcher) {
     "use strict";
-    let model
+    let theModel
     
     function showModel() {
-        if (model.winner) {
-            view.showWinner(model.winner)
-        } else if (model.stalemate) {
+        if (theModel.winner()) {
+            view.showWinner(theModel.winner())
+        } else if (theModel.stalemate()) {
             view.showStalemate()
         } else {
-            view.showInTurn(model.inTurn)
+            view.showInTurn(theModel.playerInTurn())
         }
-        view.updateBoard(model.board)
+        view.updateBoard(theModel.tiles())
     }
 
     async function clickBoard(x, y) {
-        const { moves, inTurn, winner, stalemate } = await dispatcher.move(x, y, model.gameNumber)
-        for(let {x, y, player} of moves) model.board[x][y] = player
-        Object.assign(model, { inTurn, winner, stalemate })
+        const { moves } = await dispatcher.move(x, y, theModel.gameNumber)
+        theModel = moves.reduce((md, { x, y }) => md.makeMove(x, y), theModel) 
         showModel()
     }
 
     async function clickReset() {
         const clean = await dispatcher.clean()
-        model = clean
+        theModel = model.fromJson(clean)
         showModel()
     }
 

@@ -33,22 +33,17 @@ const model = (() => {
             return createModel(setTile(board, x, y, inTurn), (inTurn === 'X') ? 'O' : 'X', gameNumber, [...moves, {x, y, player: inTurn}])
         }
         
-        const json = (extras = {}) => 
-            Object.assign(extras, 
-                          {board, inTurn, winner, stalemate, gameNumber, moves})
-
         const conceded = winner => {
             const win_state = { winner, row: undefined}
             const _moves = [...moves, { conceded: true, player: inTurn }]
             const conceded_state = { 
                 winner: win_state, 
                 stalemate: false, 
-                playerInTurn: inTurn, 
+                inTurn, 
                 legalMove: () => false, 
                 makeMove: () => conceded_state,
                 conceded: () => conceded_state, 
                 board, 
-                json: (extras = {}) => Object.assign(extras,  {board, inTurn, winner: win_state, stalemate, gameNumber, moves: _moves}), 
                 gameNumber, 
                 moves: _moves
             }
@@ -58,12 +53,11 @@ const model = (() => {
         return { 
             winner, 
             stalemate, 
-            playerInTurn: inTurn, 
+            inTurn, 
             legalMove, 
             makeMove,
             conceded, 
             board, 
-            json, 
             gameNumber, 
             moves 
         }

@@ -1,4 +1,4 @@
-import { game_state, apply_move } from './model'
+import { game_state, apply_move, pre_game_state } from './model'
 
 export function reduce(state, action) {
     switch (action.type) {
@@ -12,6 +12,9 @@ export function reduce(state, action) {
         }
         case 'reset':
             return game_state(action)
+        case 'view-front-page':
+            console.log(action)
+            return pre_game_state(action)
         default:
             return state
     }

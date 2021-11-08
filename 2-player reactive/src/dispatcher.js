@@ -1,59 +1,57 @@
 import { ajax } from 'rxjs/ajax'
 import { interval, of, merge} from 'rxjs'
-import { pairwise, filter, map, concatMap, takeWhile, first, share } from 'rxjs/operators'
+import { filter, map, concatMap, share, mergeScan } from 'rxjs/operators'
 
 const poll_url = url => 
-interval(500)
+interval(100)
 .pipe(concatMap(() => ajax.getJSON(url)))
 
-const poll_game = ({ gameNumber }) => 
-  poll_url(`http://localhost:8080/games/${gameNumber}`)
-  .pipe(pairwise())
-  .pipe(filter(([original, changed]) => original.moves.length < changed.moves.length))
-  .pipe(map(([original, changed]) => ({ type: 'make-moves', ...changed, moves: changed.moves.slice(original.moves.length)})))
-  .pipe(takeWhile(({winner, stalemate}) => !winner && !stalemate, true))
+const log = x => { console.log(x); return x}
+
+const maybeGetNewer = (url, g) => 
+  ajax.getJSON(url + '?baseline=' + g.version)
+  .pipe(filter(maybeNewer => Boolean(maybeNewer)))
+
+const poll_changed = (url, first) => 
+  interval(100)
+  .pipe(mergeScan((g, _) => maybeGetNewer(url, g), first))
+
+const poll_game = (game) => 
+  poll_changed(`http://localhost:8080/games/${game.gameNumber}`, game)
+  .pipe(map(log))
 
 const reset_action = player => game => ({type: 'reset', player, game})
 
+const start_game = (httpCall, player) => {
+  const game = ajax(httpCall)
+  .pipe(map(res => res.response))
+  .pipe(share())
+
+  const opponent_moves = game.pipe(concatMap(poll_game))
+
+  return merge(game, opponent_moves).pipe(map(reset_action(player)))
+}
+
 export const server_dispatch_rx = action => {
   switch(action.type) {
+    case 'front-page': {
+      return ajax.getJSON('http://localhost:8080/games')
+      .pipe(map(games => ({type: 'view-front-page', games})))
+    }
     case 'new': {
-      const start_game = ajax({ url: 'http://localhost:8080/games', method: 'POST' })
-      .pipe(map(res => res.response))
-      .pipe(share())
-      
-      const opponent_joined = start_game
-      .pipe(map(game => game.gameNumber))
-      .pipe(concatMap(gameNumber => poll_url(`http://localhost:8080/games/${gameNumber}`)))
-      .pipe(first(game => game.ongoing))
-      
-      const opponent_moves = opponent_joined
-      .pipe(concatMap(poll_game))
-      
-      return  merge(
-        start_game.pipe(map(reset_action('X'))),
-        opponent_joined.pipe(map(reset_action('X'))), 
-        opponent_moves
-        )
+      return start_game({url: 'http://localhost:8080/games', method: 'POST' }, 'X')
     }
     case 'join': {
-      const game = ajax( { url: `http://localhost:8080/games/${action.gameNumber}`, method: 'PATCH', body: JSON.stringify({ongoing: true})})
-      .pipe(map(res => res.response))
-      .pipe(share())
-
-      const opponent_moves = game
-      .pipe(concatMap(poll_game))
-
-      return merge(game.pipe(map(reset_action('O'))), opponent_moves)
+      return start_game({url: `http://localhost:8080/games/${action.gameNumber}`, method: 'PATCH', body: JSON.stringify({ongoing: true})}, 'O')
     }
     case 'move': {
-      const { x, y, player } = action
-      return ajax({
-        url: `http://localhost:8080/games/${action.gameNumber}/moves`, 
+      const { x, y, player, gameNumber } = action
+      ajax({
+        url: `http://localhost:8080/games/${gameNumber}/moves`, 
         method: 'POST', 
         body: JSON.stringify({x, y, inTurn: player})})
-      .pipe(map(res => res.response))
-      .pipe(map(({ moves, inTurn, winner, stalemate }) => ({type: 'make-moves', moves, inTurn, winner, stalemate})))
+      .subscribe(x => x)
+      return of()         
     }
     case 'concede': {
       const winner  = action.player === 'X' ? 'O' : 'X'

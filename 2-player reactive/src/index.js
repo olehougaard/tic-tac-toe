@@ -1,6 +1,6 @@
 import './index.css';
 import { pre_game_state } from './model'
-import { reduce } from './store'
+import { reduce } from './reducer'
 import { server_dispatch_rx } from './dispatcher'
 import { create_view } from './View'
 

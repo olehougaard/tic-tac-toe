@@ -48,12 +48,13 @@ const game_view = dispatch => ({ game, player }) =>
 <div> 
       <h1>Tic-tac-toe</h1>
         <Message status = {game} player = {player} />
-        {
-          (game.ongoing)?
-            <Board game={game} dispatch = {dispatch} player = {player} />
-            : <div></div>
-        }
-      <button id = 'concede' 
+        <Board game={game} dispatch = {dispatch} player = {player} />
+        {(game.winner || game.stalemate) ?
+          <button id = 'reset'
+           onClick = {() => dispatch({type: "front-page"})}>
+             Reset
+          </button>
+        : <button id = 'concede' 
               onClick = {() => 
                 dispatch({
                   type: "concede", 
@@ -61,6 +62,7 @@ const game_view = dispatch => ({ game, player }) =>
                   gameNumber: game.gameNumber})}>
                     Concede
       </button>
+      }
     </div>
 
 const View = ({ state, dispatch }) => state.accept({

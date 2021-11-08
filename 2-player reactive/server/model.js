@@ -35,10 +35,11 @@ const model = (() => {
         
         const json = (extras = {}) => 
             Object.assign(extras, 
-                          {board, inTurn, winner, stalemate, gameNumber})
+                          {board, inTurn, winner, stalemate, gameNumber, moves})
 
         const conceded = winner => {
             const win_state = { winner, row: undefined}
+            const _moves = [...moves, { conceded: true, player: inTurn }]
             const conceded_state = { 
                 winner: win_state, 
                 stalemate: false, 
@@ -47,9 +48,9 @@ const model = (() => {
                 makeMove: () => conceded_state,
                 conceded: () => conceded_state, 
                 board, 
-                json: (extras = {}) => Object.assign(extras,  {board, inTurn, winner: win_state, stalemate, gameNumber}), 
+                json: (extras = {}) => Object.assign(extras,  {board, inTurn, winner: win_state, stalemate, gameNumber, moves: _moves}), 
                 gameNumber, 
-                moves: [...moves, { conceded: true, player: inTurn }]
+                moves: _moves
             }
             return conceded_state
         }

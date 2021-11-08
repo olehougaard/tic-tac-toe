@@ -115,13 +115,4 @@ gameserver.post('/games/:gameNumber/moves', (req, res) => {
     })
 })
 
-gameserver.get('/games/:gameNumber/moves', (req, res) => {
-    send_game_data(res, req.params.gameNumber, g => ({ 
-        moves: g.moves, 
-        inTurn: g.playerInTurn,
-        winner: g.winner,
-        stalemate: g.stalemate
-    }))
-})
-
 gameserver.listen(8080, () => console.log('Gameserver listening on 8080'))

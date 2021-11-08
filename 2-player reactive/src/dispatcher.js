@@ -3,11 +3,11 @@ import { interval, of, merge} from 'rxjs'
 import { pairwise, filter, map, concatMap, takeWhile, first, share } from 'rxjs/operators'
 
 const poll_url = url => 
-interval(100)
+interval(500)
 .pipe(concatMap(() => ajax.getJSON(url)))
 
-const poll_moves = gameNumber => 
-  poll_url(`http://localhost:8080/games/${gameNumber}/moves`)
+const poll_game = ({ gameNumber }) => 
+  poll_url(`http://localhost:8080/games/${gameNumber}`)
   .pipe(pairwise())
   .pipe(filter(([original, changed]) => original.moves.length < changed.moves.length))
   .pipe(map(([original, changed]) => ({ type: 'make-moves', ...changed, moves: changed.moves.slice(original.moves.length)})))
@@ -28,8 +28,7 @@ export const server_dispatch_rx = action => {
       .pipe(first(game => game.ongoing))
       
       const opponent_moves = opponent_joined
-      .pipe(map(game => game.gameNumber))
-      .pipe(concatMap(poll_moves))
+      .pipe(concatMap(poll_game))
       
       return  merge(
         start_game.pipe(map(reset_action('X'))),
@@ -43,8 +42,7 @@ export const server_dispatch_rx = action => {
       .pipe(share())
 
       const opponent_moves = game
-      .pipe(map(game => game.gameNumber))
-      .pipe(concatMap(poll_moves))
+      .pipe(concatMap(poll_game))
 
       return merge(game.pipe(map(reset_action('O'))), opponent_moves)
     }

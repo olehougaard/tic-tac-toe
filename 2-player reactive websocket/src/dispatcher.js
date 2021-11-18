@@ -1,4 +1,4 @@
-export const server_dispatch = ws => action => {
+export const server_dispatch = action => {
   switch(action.type) {
     case 'concede': {
       const winner  = action.player === 'X' ? 'O' : 'X'

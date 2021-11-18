@@ -1,6 +1,6 @@
 import './index.css';
 import { pre_game_state } from './model'
-import { reduce } from './store'
+import { reduce } from './reduce'
 import { server_dispatch, create_action } from './dispatcher'
 import { create_view } from './View'
 import { Subject, merge } from 'rxjs'
@@ -17,10 +17,8 @@ const render = dom => ReactDOM.render(dom, document.getElementById('root'))
 const view = create_view(dispatch)
 
 actions
-.pipe(map(server_dispatch(ws)))
+.pipe(map(server_dispatch))
 .subscribe(command => ws.next(command))
-
-const log = x => { console.log(x); return x }
 
 merge(actions, ws.pipe(map(create_action)))
 .pipe(scan(reduce, pre_game_state({games: []})))

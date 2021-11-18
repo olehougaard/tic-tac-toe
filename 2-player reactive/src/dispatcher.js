@@ -3,7 +3,7 @@ import { interval, of, merge} from 'rxjs'
 import { filter, map, concatMap, share, mergeScan } from 'rxjs/operators'
 
 const poll_url = url => 
-interval(100)
+interval(500)
 .pipe(concatMap(() => ajax.getJSON(url)))
 
 const log = x => { console.log(x); return x}
@@ -13,12 +13,11 @@ const maybeGetNewer = (url, g) =>
   .pipe(filter(maybeNewer => Boolean(maybeNewer)))
 
 const poll_changed = (url, first) => 
-  interval(100)
+  interval(500)
   .pipe(mergeScan((g, _) => maybeGetNewer(url, g), first))
 
-const poll_game = (game) => 
+const poll_game = game =>
   poll_changed(`http://localhost:8080/games/${game.gameNumber}`, game)
-  .pipe(map(log))
 
 const reset_action = player => game => ({type: 'reset', player, game})
 
@@ -46,12 +45,12 @@ export const server_dispatch_rx = action => {
     }
     case 'move': {
       const { x, y, player, gameNumber } = action
-      ajax({
+      return ajax({
         url: `http://localhost:8080/games/${gameNumber}/moves`, 
         method: 'POST', 
         body: JSON.stringify({x, y, inTurn: player})})
-      .subscribe(x => x)
-      return of()         
+      .pipe(map(res => res.response))
+      .pipe(map(reset_action(player)))
     }
     case 'concede': {
       const winner  = action.player === 'X' ? 'O' : 'X'
